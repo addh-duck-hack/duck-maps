@@ -141,6 +141,7 @@ exports.actualizarUsuarioPropio = async (req, res) => {
       }
     });
 
+    // Actualizar el usuario autenticado
     const usuario = await Usuario.findByIdAndUpdate(req.usuario._id, datosActualizados, { new: true });
     if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
 
@@ -149,6 +150,7 @@ exports.actualizarUsuarioPropio = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // Cambiar contraseña del usuario autenticado
 exports.cambiarContraseña = async (req, res) => {
