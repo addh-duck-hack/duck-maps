@@ -106,22 +106,85 @@ exports.listarUsuarios = async (req, res) => {
   }
 };
 
-// Actualizar un usuario
-exports.actualizarUsuario = async (req, res) => {
+// Actualizar un usuario (solo Administrador)
+exports.actualizarUsuarioAdmin = async (req, res) => {
   try {
-    const usuario = await Usuario.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const camposPermitidos = ['nombreCompleto', 'foto', 'numeroTelefono', 'tipo', 'licencia', 'tarjeton', 'activo'];
+    const datosActualizados = {};
+
+    // Filtrar los campos permitidos para la actualización
+    Object.keys(req.body).forEach((campo) => {
+      if (camposPermitidos.includes(campo)) {
+        datosActualizados[campo] = req.body[campo];
+      }
+    });
+
+    const usuario = await Usuario.findByIdAndUpdate(req.params.id, datosActualizados, { new: true });
     if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+
     res.json(usuario);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Eliminar un usuario
+// Actualizar datos básicos del usuario autenticado
+exports.actualizarUsuarioPropio = async (req, res) => {
+  try {
+    const camposPermitidos = ['nombreCompleto', 'foto', 'numeroTelefono'];
+    const datosActualizados = {};
+
+    // Filtrar los campos permitidos
+    Object.keys(req.body).forEach((campo) => {
+      if (camposPermitidos.includes(campo)) {
+        datosActualizados[campo] = req.body[campo];
+      }
+    });
+
+    const usuario = await Usuario.findByIdAndUpdate(req.usuario._id, datosActualizados, { new: true });
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    res.json(usuario);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Cambiar contraseña del usuario autenticado
+exports.cambiarContraseña = async (req, res) => {
+  try {
+    const { contraseñaActual, nuevaContraseña } = req.body;
+
+    if (!contraseñaActual || !nuevaContraseña) {
+      return res.status(400).json({ error: 'Debes proporcionar la contraseña actual y la nueva contraseña.' });
+    }
+
+    const usuario = await Usuario.findById(req.usuario._id);
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    // Verificar la contraseña actual
+    const esValida = await bcrypt.compare(contraseñaActual, usuario.contraseña);
+    if (!esValida) {
+      return res.status(400).json({ error: 'La contraseña actual no es correcta.' });
+    }
+
+    // Encriptar y guardar la nueva contraseña
+    usuario.contraseña = await bcrypt.hash(nuevaContraseña, 10);
+    await usuario.save();
+
+    res.json({ message: 'Contraseña actualizada exitosamente.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Eliminar un usuario (solo Administrador)
 exports.eliminarUsuario = async (req, res) => {
   try {
     const usuario = await Usuario.findByIdAndDelete(req.params.id);
-    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
     res.json({ message: 'Usuario eliminado' });
   } catch (err) {
     res.status(500).json({ error: err.message });
