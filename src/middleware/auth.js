@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
 
-// Verificar token y obtener usuario autenticado
 exports.authenticate = async (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -10,10 +9,17 @@ exports.authenticate = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Asegurarse de que el ID sea válido para MongoDB
+        if (!mongoose.Types.ObjectId.isValid(decoded.id)) {
+            return res.status(400).json({ error: 'ID del usuario no válido.' });
+        }
+
         const usuario = await Usuario.findById(decoded.id);
         if (!usuario) {
-        return res.status(404).json({ error: 'Usuario no encontrado.' });
+            return res.status(404).json({ error: 'Usuario no encontrado.' });
         }
+
         req.usuario = usuario; // Agregar el usuario autenticado al request
         next();
     } catch (err) {
