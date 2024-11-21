@@ -9,7 +9,7 @@ exports.authenticate = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+        console.log('Token decodificado:', decoded); // Debugging: Ver el contenido del token
         // Asegurarse de que el ID sea válido para MongoDB
         if (!mongoose.Types.ObjectId.isValid(decoded.id)) {
             return res.status(400).json({ error: 'ID del usuario no válido.' });
@@ -23,6 +23,7 @@ exports.authenticate = async (req, res, next) => {
         req.usuario = usuario; // Agregar el usuario autenticado al request
         next();
     } catch (err) {
+        console.error('Error en la verificación del token:', err.message); // Debugging
         res.status(401).json({ error: 'Token inválido.' });
     }
 };

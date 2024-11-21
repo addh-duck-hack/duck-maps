@@ -76,7 +76,11 @@ exports.login = async (req, res) => {
       return res.status(403).json({ error: 'Usuario no activado. Valida tu correo electrónico.' });
     }
 
-    const token = jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign(
+      { id: usuario._id.toString() }, // Asegúrate de que el ID esté en formato de string
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
     res.json({ token, message: 'Inicio de sesión exitoso' });
   } catch (err) {
