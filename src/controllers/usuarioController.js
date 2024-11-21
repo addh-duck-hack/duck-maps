@@ -53,7 +53,7 @@ exports.validarCorreo = async (req, res) => {
     if (usuario.codigoValidacion !== codigo) return res.status(400).json({ error: 'Código incorrecto' });
 
     usuario.activo = true;
-    usuario.codigoValidacion = undefined; // Eliminar el código tras validación
+    usuario.codigoValidacion = null; // Eliminar el código tras validación
     await usuario.save();
 
     res.json({ message: 'Correo validado exitosamente. Tu cuenta está activa.' });

@@ -11,7 +11,7 @@ const UsuarioSchema = new mongoose.Schema({
   licencia: { type: String }, // Solo para Chofer
   tarjeton: { type: String }, // Solo para Chofer
   activo: { type: Boolean, default: false },
-  codigoValidacion: { type: String, required: true },
+  codigoValidacion: { type: String},
   fechaAlta: { type: Date, default: Date.now } // Fecha de alta automática
 });
 
