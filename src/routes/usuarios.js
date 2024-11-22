@@ -13,7 +13,7 @@ router.put('/:id', authenticate, isAdmin, usuarioController.actualizarUsuarioAdm
 // Usuario actualiza sus propios datos
 router.put('/me/editar', authenticate, usuarioController.actualizarUsuarioPropio);
 // Usuario cambia su contraseña
-router.put('/me/contraseña', authenticate, usuarioController.cambiarContraseña);
+router.put('/me/contrasena', authenticate, usuarioController.cambiarContraseña);
 router.delete('/:id', authenticate, isAdmin, usuarioController.eliminarUsuario);
 
 module.exports = router;
