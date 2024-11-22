@@ -175,7 +175,7 @@ exports.cambiarContraseña = async (req, res) => {
     }
 
     // Encriptar y guardar la nueva contraseña
-    usuario.contraseña = await bcrypt.hash(nuevaContraseña, 10);
+    usuario.contraseña = nuevaContraseña;
     await usuario.save();
 
     res.json({ message: 'Contraseña actualizada exitosamente.' });
