@@ -11,7 +11,7 @@ router.get('/:id', authenticate, usuarioController.obtenerUsuario);
 // Administrador actualiza un usuario
 router.put('/:id', authenticate, isAdmin, usuarioController.actualizarUsuarioAdmin);
 // Usuario actualiza sus propios datos
-router.put('/me', authenticate, usuarioController.actualizarUsuarioPropio);
+router.put('/me/editar', authenticate, usuarioController.actualizarUsuarioPropio);
 // Usuario cambia su contraseña
 router.put('/me/contraseña', authenticate, usuarioController.cambiarContraseña);
 router.delete('/:id', authenticate, isAdmin, usuarioController.eliminarUsuario);
