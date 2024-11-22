@@ -68,18 +68,23 @@ exports.login = async (req, res) => {
     const { correo, contraseña } = req.body;
     const usuario = await Usuario.findOne({ correo });
 
+    // Verificar si el usuario existe y las credenciales son válidas
     if (!usuario || !(await bcrypt.compare(contraseña, usuario.contraseña))) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
+    // Verificar si el usuario está activo
     if (!usuario.activo) {
-      return res.status(403).json({ error: 'Usuario no activado. Valida tu correo electrónico.' });
+      return res.status(403).json({
+        error: 'Para poder iniciar sesión primero valida tu cuenta con el correo que fue enviado.'
+      });
     }
 
+    // Generar el token JWT
     const token = jwt.sign(
-      { id: usuario._id.toString() }, // Asegúrate de que el ID esté en formato de string
+      { id: usuario._id.toString() },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '24h' } // Vigencia estándar para aplicaciones móviles
     );
 
     res.json({ token, message: 'Inicio de sesión exitoso' });
