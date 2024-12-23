@@ -19,5 +19,8 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 app.use('/', require('./routes/index'));
 app.use('/usuarios', usuarios);
 
+//WebSocket
+require('./socket')(server);
+
 // Start the server
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
