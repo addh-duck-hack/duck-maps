@@ -1,8 +1,10 @@
 const express = require('express');
+const http = require('http');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 const usuarios = require('./routes/usuarios');
@@ -23,4 +25,4 @@ app.use('/usuarios', usuarios);
 require('./socket')(server);
 
 // Start the server
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on https://maps.duck-hack.cloud:${PORT}`));
