@@ -3,7 +3,12 @@ const Usuario = require('./models/Usuario');
 const UsuarioActivo = require('./models/UsuarioActivo');
 
 module.exports = (server) => {
-  const io = require('socket.io')(server);
+  const io = require('socket.io')(server, {
+    cors: {
+      origin: "https://maps.duck-hack.cloud",
+      methods: ["GET", "POST"]
+    }
+  });
 
   io.on('connection', async (socket) => {
     console.log('Nueva conexión');
