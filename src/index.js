@@ -25,4 +25,4 @@ app.use('/usuarios', usuarios);
 require('./socket')(server);
 
 // Start the server
-app.listen(PORT, () => console.log(`Server running on https://maps.duck-hack.cloud:${PORT}`));
+server.listen(PORT, () => console.log(`Server running on https://maps.duck-hack.cloud:${PORT}`));
