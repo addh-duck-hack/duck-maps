@@ -11,7 +11,16 @@ function setupWebSocket(server) {
     
     // Autenticar usuario
     socket.on('message', async (message) => {
-        const { event, token } = JSON.parse(message);
+        let parsedMessage;
+        try {
+            parsedMessage = JSON.parse(message);
+        } catch (err) {
+            console.error('Error parsing message:', err);
+            socket.send(JSON.stringify({ event: 'error', message: 'Invalid JSON format' }));
+            return socket.close();
+        }
+
+        const { event, token } = parsedMessage;
         if (event === 'authenticate') {
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
