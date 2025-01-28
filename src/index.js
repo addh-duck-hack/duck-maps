@@ -8,6 +8,7 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 const usuarios = require('./routes/usuarios');
+const setupWebSocket = require('./websocket');
 
 // Middleware
 app.use(express.json());
@@ -20,6 +21,9 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 // Routes
 app.use('/', require('./routes/index'));
 app.use('/usuarios', usuarios);
+
+// Setup WebSocket
+setupWebSocket(server);
 
 server.listen(PORT, () => {
   console.log(`Server running on https://maps.duck-hack.cloud:${PORT}`);
