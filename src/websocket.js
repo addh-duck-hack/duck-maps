@@ -1,23 +1,56 @@
 const WebSocket = require('ws');
+const jwt = require('jsonwebtoken');
+const Usuario = require('./models/Usuario');
+const UsuarioActivo = require('./models/UsuarioActivo');
 
 function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server });
 
-  wss.on('connection', (ws) => {
+  wss.on('connection', async (ws) => {
     console.log('New client connected');
+    
+    // Autenticar usuario
+    socket.on('authenticate', async (token) => {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const usuario = await Usuario.findById(decoded.id);
 
-    ws.on('message', (message) => {
-      console.log(`Received message: ${message}`);
-      // Broadcast the message to all clients
-      wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(message);
+            if (!usuario || usuario.tipo !== 'Chofer') {
+            socket.emit('unauthorized', 'Solo los choferes pueden conectarse.');
+            return socket.disconnect();
+            }
+
+            console.log(`Usuario conectado: ${usuario.nombreCompleto}`);
+
+            // Registrar inicio de sesión
+            const nuevaSesion = new UsuarioActivo({
+            fechaInicio: new Date(),
+            chofer: usuario._id,
+            });
+            await nuevaSesion.save();
+
+            // Guardar sesión en el socket
+            socket.sesion = nuevaSesion;
+
+            socket.emit('authenticated', 'Conexión exitosa.');
+
+            // Desconexión
+            socket.on('disconnect', async () => {
+            console.log(`Usuario desconectado: ${usuario.nombreCompleto}`);
+
+            if (socket.sesion) {
+                socket.sesion.fechaFin = new Date();
+                const tiempoConectado = (socket.sesion.fechaFin - socket.sesion.fechaInicio) / 1000;
+                console.log(`Duración de la sesión: ${tiempoConectado} segundos`);
+
+                await socket.sesion.save();
+            }
+            });
+        } catch (err) {
+            console.error('Error en autenticación:', err.message);
+            socket.emit('unauthorized', 'Token inválido.');
+            socket.disconnect();
         }
-      });
-    });
-
-    ws.on('close', () => {
-      console.log('Client disconnected');
     });
   });
 
