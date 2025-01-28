@@ -21,10 +21,6 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 app.use('/', require('./routes/index'));
 app.use('/usuarios', usuarios);
 
-// WebSocket
-const socket = require('./socket');
-socket(server);
-
 server.listen(PORT, () => {
   console.log(`Server running on https://maps.duck-hack.cloud:${PORT}`);
 });

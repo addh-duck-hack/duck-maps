@@ -87,7 +87,7 @@ exports.login = async (req, res) => {
       { expiresIn: '24h' } // Vigencia estándar para aplicaciones móviles
     );
 
-    res.json({ token, message: 'Inicio de sesión exitoso' });
+    res.json({ token, id: usuario._id.toString(), message: 'Inicio de sesión exitoso' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
