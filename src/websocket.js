@@ -6,51 +6,39 @@ const UsuarioActivo = require('./models/UsuarioActivo');
 function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server });
 
-  wss.on('connection', async (ws) => {
+  wss.on('connection', async (socket) => {
     console.log('New client connected');
     
     // Autenticar usuario
-    socket.on('authenticate', async (token) => {
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            const usuario = await Usuario.findById(decoded.id);
+    socket.on('message', async (message) => {
+        const { event, token } = JSON.parse(message);
+        if (event === 'authenticate') {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const usuario = await Usuario.findById(decoded.id);
 
-            if (!usuario || usuario.tipo !== 'Chofer') {
-            socket.emit('unauthorized', 'Solo los choferes pueden conectarse.');
-            return socket.disconnect();
+                if (!usuario || usuario.tipo !== 'Chofer') {
+                    socket.send(JSON.stringify({ event: 'unauthorized', message: 'Solo los choferes pueden conectarse.' }));
+                    return socket.close();
+                }
+
+                console.log(`Usuario conectado: ${usuario.nombreCompleto}`);
+
+                // Registrar inicio de sesión
+                const usuarioActivo = new UsuarioActivo({ usuario: usuario._id });
+                await usuarioActivo.save();
+
+                socket.send(JSON.stringify({ event: 'authenticated', message: 'Autenticación exitosa' }));
+            } catch (err) {
+                console.error('Error en la autenticación:', err);
+                socket.send(JSON.stringify({ event: 'unauthorized', message: 'Token inválido' }));
+                socket.close();
             }
-
-            console.log(`Usuario conectado: ${usuario.nombreCompleto}`);
-
-            // Registrar inicio de sesión
-            const nuevaSesion = new UsuarioActivo({
-            fechaInicio: new Date(),
-            chofer: usuario._id,
-            });
-            await nuevaSesion.save();
-
-            // Guardar sesión en el socket
-            socket.sesion = nuevaSesion;
-
-            socket.emit('authenticated', 'Conexión exitosa.');
-
-            // Desconexión
-            socket.on('disconnect', async () => {
-            console.log(`Usuario desconectado: ${usuario.nombreCompleto}`);
-
-            if (socket.sesion) {
-                socket.sesion.fechaFin = new Date();
-                const tiempoConectado = (socket.sesion.fechaFin - socket.sesion.fechaInicio) / 1000;
-                console.log(`Duración de la sesión: ${tiempoConectado} segundos`);
-
-                await socket.sesion.save();
-            }
-            });
-        } catch (err) {
-            console.error('Error en autenticación:', err.message);
-            socket.emit('unauthorized', 'Token inválido.');
-            socket.disconnect();
         }
+    });
+
+    socket.on('close', () => {
+      console.log('Client disconnected');
     });
   });
 
