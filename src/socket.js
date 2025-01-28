@@ -6,7 +6,8 @@ module.exports = (server) => {
   const io = require('socket.io')(server, {
     cors: {
       origin: "https://maps.duck-hack.cloud",
-      methods: ["GET", "POST"]
+      methods: ["GET", "POST"],
+      credentials: true
     }
   });
 
@@ -24,36 +25,23 @@ module.exports = (server) => {
           return socket.disconnect();
         }
 
-        console.log(`Usuario conectado: ${usuario.nombreCompleto}`);
+        // Usuario autenticado
+        socket.emit('authenticated', 'Usuario autenticado');
+        console.log(`Usuario ${usuario.nombre} autenticado`);
 
-        // Registrar inicio de sesión
-        const nuevaSesion = new UsuarioActivo({
-          fechaInicio: new Date(),
-          chofer: usuario._id,
-        });
-        await nuevaSesion.save();
+        // Agregar usuario a la lista de usuarios activos
+        const usuarioActivo = new UsuarioActivo({ usuario: usuario._id, socketId: socket.id });
+        await usuarioActivo.save();
 
-        // Guardar sesión en el socket
-        socket.sesion = nuevaSesion;
-
-        socket.emit('authenticated', 'Conexión exitosa.');
-
-        // Desconexión
+        // Manejar desconexión
         socket.on('disconnect', async () => {
-          console.log(`Usuario desconectado: ${usuario.nombreCompleto}`);
-
-          if (socket.sesion) {
-            socket.sesion.fechaFin = new Date();
-            const tiempoConectado = (socket.sesion.fechaFin - socket.sesion.fechaInicio) / 1000;
-            console.log(`Duración de la sesión: ${tiempoConectado} segundos`);
-
-            await socket.sesion.save();
-          }
+          await UsuarioActivo.findOneAndDelete({ socketId: socket.id });
+          console.log(`Usuario ${usuario.nombre} desconectado`);
         });
+
       } catch (err) {
-        console.error('Error en autenticación:', err.message);
-        socket.emit('unauthorized', 'Token inválido.');
-        socket.disconnect();
+        socket.emit('unauthorized', 'Token inválido');
+        return socket.disconnect();
       }
     });
   });
