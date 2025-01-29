@@ -2,6 +2,7 @@
 const WebSocket = require('ws');
 const authenticate = require('./events/authenticate');
 const assignCar = require('./events/assignCar');
+const Session = require('../models/Session');
 
 function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server });
@@ -30,7 +31,7 @@ function setupWebSocket(server) {
     });
 
     socket.on('close', async () => {
-      console.log(`Usuario desconectado: ${socket.usuarioId}`);
+      console.log(`Usuario desconectado: ${socket.userId}`);
       if (socket.userId) {
         try {
           const session = await Session.findOne({ user: socket.userId, disconnection: null });
