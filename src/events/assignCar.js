@@ -1,14 +1,14 @@
 // filepath: /Users/jacobo/Documents/Duck-Hack/duck-maps/src/events/setUnidad.js
-const UsuarioActivo = require('../models/UsuarioActivo');
+const Session = require('../models/Session');
 
-async function setUnidad(socket, message) {
-    const { unidad, token } = message;
+async function assignCar(socket, message) {
+    const { car, token } = message;
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const usuarioActivo = await UsuarioActivo.findOne({ chofer: decoded.id, fechaFin: null });
-        if (usuarioActivo) {
-            usuarioActivo.unidad = unidad;
-            await usuarioActivo.save();
+        const session = await Session.findOne({ user: decoded.id, connection: null });
+        if (session) {
+            session.car = car;
+            await session.save();
             socket.send(JSON.stringify({ event: 'unidadSet', message: 'Unidad asignada exitosamente' }));
         } else {
             socket.send(JSON.stringify({ event: 'error', message: 'Usuario no autenticado o sesión no encontrada' }));
@@ -19,4 +19,4 @@ async function setUnidad(socket, message) {
     }
 }
 
-module.exports = setUnidad;
+module.exports = assignCar;

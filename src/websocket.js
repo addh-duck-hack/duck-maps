@@ -1,7 +1,7 @@
 // filepath: /Users/jacobo/Documents/Duck-Hack/duck-maps/src/websocket.js
 const WebSocket = require('ws');
 const authenticate = require('./events/authenticate');
-const setUnidad = require('./events/setUnidad');
+const assignCar = require('./events/assignCar');
 
 function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server });
@@ -22,14 +22,29 @@ function setupWebSocket(server) {
 
         const { event } = parsedMessage;
         if (event === 'authenticate') {
+            //Aqui vamos a autenticar al usuario para que pueda utilizar el websocket
             await authenticate(socket, parsedMessage);
-        } else if (event === 'setUnidad') {
-            await setUnidad(socket, parsedMessage);
+        } else if (event === 'assignCar') {
+            await assignCar(socket, parsedMessage);
         }
     });
 
-    socket.on('close', () => {
-      console.log('Client disconnected');
+    socket.on('close', async () => {
+      console.log(`Usuario desconectado: ${socket.usuarioId}`);
+      if (socket.userId) {
+        try {
+          const session = await Session.findOne({ user: socket.userId, disconnection: null });
+          if (session) {
+            session.disconnection = new Date();
+            session.duration = (session.disconnection - session.connection) / 1000;
+            await session.save();
+            console.log(`Usuario desconectado: ${socket.usuarioId}`);
+            console.log('Desconexión registrada:', session);
+          }
+        } catch (err) {
+          console.error('Error al cerrar la desconexión:', err);
+        }
+      }
     });
   });
 

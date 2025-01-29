@@ -1,29 +1,43 @@
 // filepath: /Users/jacobo/Documents/Duck-Hack/duck-maps/src/events/authenticate.js
 const jwt = require('jsonwebtoken');
-const Usuario = require('../models/Usuario');
-const UsuarioActivo = require('../models/UsuarioActivo');
+const User = require('../models/User');
+const Session = require('../models/Session');
 
 async function authenticate(socket, message) {
     const { token } = message;
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const usuario = await Usuario.findById(decoded.id);
+        const user = await User.findById(decoded.id);
 
-        if (!usuario || usuario.tipo !== 'Chofer') {
-            socket.send(JSON.stringify({ event: 'unauthorized', message: 'Solo los choferes pueden conectarse.' }));
+        if (!user) {
+            socket.send(JSON.stringify({ event: 'error', message: 'No se pudo encontrar el usuario. Error critico' }));
             return socket.close();
         }
 
-        console.log(`Usuario conectado: ${usuario.nombreCompleto}`);
+        // Almacenar el ID del usuario en el objeto socket
+        socket.userId = user._id;
 
-        // Registrar inicio de sesión
-        const usuarioActivo = new UsuarioActivo({
-            fechaInicio: new Date(),
-            usuario: usuario._id
-        });
-        await usuarioActivo.save();
+        // Cuando el usuario es un chofer creamos la sesion vacia
+        if (user.type == 'Chofer'){
+            console.log(`Chofer conectado: ${user.nombreCompleto}`);
+            // Registrar inicio de sesión
+            const session = new Session({
+                user: usuario._id
+            });
+            await session.save();
 
-        socket.send(JSON.stringify({ event: 'authenticated', message: 'Autenticación exitosa' }));
+            socket.send(JSON.stringify({ event: 'authenticated', message: `Se creo la sesion del Chofer: ${user.nombreCompleto}` }));
+        }else{
+            console.log(`Usuario conectado: ${user.nombreCompleto} \nTipo: ${user.type}`);
+            // Registrar inicio de sesión
+            const session = new Session({
+                user: usuario._id,
+                connection: new Date()
+            });
+            await session.save();
+
+            socket.send(JSON.stringify({ event: 'authenticated', message: `Se creo la sesion del ${user.type}: ${user.nombreCompleto}` }));
+        }
     } catch (err) {
         console.error('Error en la autenticación:', err);
         socket.send(JSON.stringify({ event: 'unauthorized', message: 'Error en la autenticación, el token no cuenta con el formato correcto o esta vencido.' }));
