@@ -84,7 +84,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id.toString() },
       process.env.JWT_SECRET,
-      { expiresIn: '5m' } //Se modifica a 99 días de duración
+      { expiresIn: '99d' } //Se modifica a 99 días de duración
     );
 
     res.json({ token, id: user._id.toString(), message: 'Inicio de sesión exitoso' });
