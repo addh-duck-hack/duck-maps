@@ -19,24 +19,24 @@ async function authenticate(socket, message) {
 
         // Cuando el usuario es un chofer creamos la sesion vacia
         if (user.type == 'Chofer'){
-            console.log(`Chofer conectado: ${user.nombreCompleto}`);
+            console.log(`Chofer conectado: ${user.fullName}`);
             // Registrar inicio de sesión
             const session = new Session({
-                user: usuario._id
+                user: user._id
             });
             await session.save();
 
-            socket.send(JSON.stringify({ event: 'authenticated', message: `Se creo la sesion del Chofer: ${user.nombreCompleto}` }));
+            socket.send(JSON.stringify({ event: 'authenticated', message: `Se creo la sesion del Chofer: ${user.fullName}` }));
         }else{
-            console.log(`Usuario conectado: ${user.nombreCompleto} \nTipo: ${user.type}`);
+            console.log(`Usuario conectado: ${user.fullName} \nTipo: ${user.type}`);
             // Registrar inicio de sesión
             const session = new Session({
-                user: usuario._id,
+                user: user._id,
                 connection: new Date()
             });
             await session.save();
 
-            socket.send(JSON.stringify({ event: 'authenticated', message: `Se creo la sesion del ${user.type}: ${user.nombreCompleto}` }));
+            socket.send(JSON.stringify({ event: 'authenticated', message: `Se creo la sesion del ${user.type}: ${user.fullName}` }));
         }
     } catch (err) {
         console.error('Error en la autenticación:', err);
