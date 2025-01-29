@@ -36,11 +36,15 @@ function setupWebSocket(server) {
         try {
           const session = await Session.findOne({ user: socket.userId, disconnection: null });
           if (session) {
-            session.disconnection = new Date();
-            session.duration = (session.disconnection - session.connection) / 1000;
-            await session.save();
-            console.log(`Usuario desconectado: ${socket.usuarioId}`);
-            console.log('Desconexión registrada:', session);
+            if (!session.connection) {
+              await session.remove();
+              console.log('La sesion no tenia una fecha de inicia, se elimina');
+            }else{
+              session.disconnection = new Date();
+              session.duration = (session.disconnection - session.connection) / 1000;
+              await session.save();
+              console.log('Desconexión registrada:', session);
+            }
           }
         } catch (err) {
           console.error('Error al cerrar la desconexión:', err);
