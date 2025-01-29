@@ -11,9 +11,9 @@ router.get('/:id', authenticate, userController.getUser);
 // Administrador actualiza un usuario
 router.put('/:id', authenticate, isAdmin, userController.updateUserXAdmin);
 // Usuario actualiza sus propios datos
-router.put('/me/edit', authenticate, userController.updateUser);
+router.put('/:id/edit', authenticate, userController.updateUser);
 // Usuario cambia su contraseña
-router.put('/me/pass', authenticate, userController.changePassword);
+router.put('/:id/pass', authenticate, userController.changePassword);
 router.delete('/:id', authenticate, isAdmin, userController.deleteUser);
 
 module.exports = router;
