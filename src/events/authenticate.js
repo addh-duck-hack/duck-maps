@@ -19,7 +19,7 @@ async function authenticate(socket, message) {
         // Registrar inicio de sesión
         const usuarioActivo = new UsuarioActivo({
             fechaInicio: new Date(),
-            chofer: usuario._id
+            usuario: usuario._id
         });
         await usuarioActivo.save();
 
