@@ -37,8 +37,12 @@ function setupWebSocket(server) {
           const session = await Session.findOne({ user: socket.userId, disconnection: null });
           if (session) {
             if (!session.connection) {
-              await session.remove();
-              console.log('La sesion no tenia una fecha de inicia, se elimina');
+              const deleteSession = await Session.findByIdAndDelete(session._id);
+              if (deleteSession){
+                console.log('La sesion no tenia una fecha de inicia, se elimina');
+              }else{
+                console.log('No se pudo eliminar la sesion: ', session);
+              }
             }else{
               session.disconnection = new Date();
               session.duration = (session.disconnection - session.connection) / 1000;
