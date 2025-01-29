@@ -8,6 +8,12 @@ exports.newUser = async (req, res) => {
   try {
     const { phone, mail, fullName, pass } = req.body;
 
+    // Validar formato del correo
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(mail)) {
+      return res.status(400).json({ error: 'El correo no tiene un formato correcto.' });
+    }
+
     // Verificar si el correo ya está registrado
     const existingUser = await User.findOne({ mail });
     if (existingUser) {
