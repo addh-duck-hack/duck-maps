@@ -10,7 +10,7 @@ router.post('/validateMail', userController.validateMail);
 //Realiza login y devuelve token
 router.post('/login', userController.login);
 //Renovar token de consumo
-router.post('/refreshToken/:id', authenticate, userController.getNewToken);
+router.get('/refreshToken/:id', authenticate, userController.getNewToken);
 // Lista de usuarios
 router.get('/', authenticate, isAdmin, userController.listUsers);
 // Obtener un usuario por ID
