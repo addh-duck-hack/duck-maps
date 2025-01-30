@@ -99,6 +99,24 @@ exports.login = async (req, res) => {
   }
 };
 
+// Actualizar token
+exports.getNewToken = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    
+    // Generar el token JWT
+    const token = jwt.sign(
+      { id: user._id.toString() },
+      process.env.JWT_SECRET,
+      { expiresIn: '99d' } //Se modifica a 99 días de duración
+    );
+
+    res.json({ token, id: user._id.toString(), message: 'Token actualizado correctamente' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 // Obtener un usuario por ID
 exports.getUser = async (req, res) => {

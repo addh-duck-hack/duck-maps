@@ -30,6 +30,7 @@ function setupWebSocket(server) {
         }
     });
 
+    //Cerrar la conexion de cada usuario
     socket.on('close', async () => {
       console.log(`Usuario desconectado: ${socket.userId}`);
       if (socket.userId) {
@@ -39,7 +40,7 @@ function setupWebSocket(server) {
             if (!session.connection) {
               const deleteSession = await Session.findByIdAndDelete(session._id);
               if (deleteSession){
-                console.log('La sesion no tenia una fecha de inicia, se elimina');
+                console.log('La sesion no tenia una fecha de inicio, se elimina');
               }else{
                 console.log('No se pudo eliminar la sesion: ', session);
               }
