@@ -14,7 +14,7 @@ async function authenticate(socket, message) {
         }
 
         // Almacenar el ID del usuario en el objeto socket
-        socket.userId = user._id;
+        socket.userId = user._id.toString();
 
         // Cuando el usuario es un chofer creamos la sesion vacia
         if (user.type == 'Chofer'){

@@ -33,7 +33,16 @@ function setupWebSocket(server) {
             // Enviar la lista de usuarios conectados
             const users = Array.from(connectedUsers.keys());
             socket.send(JSON.stringify({ event: 'usersConnected', users }));
-        }
+        }else if (event === 'sendMessage') {
+            // Enviar mensaje a un usuario específico
+            const { userId, message } = parsedMessage;
+            const userSocket = connectedUsers.get(userId);
+            if (userSocket) {
+              userSocket.send(JSON.stringify({ event: 'sendMessage', message }));
+            } else {
+              socket.send(JSON.stringify({ event: 'error', message: 'Usuario no encontrado' }));
+            }
+          }
     });
 
     //Cerrar la conexion de cada usuario
