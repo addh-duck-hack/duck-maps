@@ -1,4 +1,3 @@
-// filepath: /Users/jacobo/Documents/Duck-Hack/duck-maps/src/websocket.js
 const WebSocket = require('ws');
 const authenticate = require('./events/authenticate');
 const assignCar = require('./events/assignCar');
@@ -27,7 +26,7 @@ function setupWebSocket(server) {
         if (event === 'authenticate') {
             await authenticate(socket, parsedMessage);
             // Almacenar el usuario en el mapa de usuarios conectados
-            connectedUsers.set(socket.usuarioId, socket);
+            connectedUsers.set(socket.userId, socket);
         } else if (event === 'assignCar') {
             await assignCar(socket, parsedMessage);
         } else if (event === 'usersConnected') {
@@ -37,15 +36,37 @@ function setupWebSocket(server) {
         }
     });
 
-    // Cerrar la conexión de cada usuario
+    //Cerrar la conexion de cada usuario
     socket.on('close', async () => {
-      console.log(`Usuario desconectado: ${socket.usuarioId}`);
+      console.log(`Usuario desconectado: ${socket.userId}`);
       // Eliminar el usuario del mapa de usuarios conectados
-      connectedUsers.delete(socket.usuarioId);
+      connectedUsers.delete(socket.userId);
+      if (socket.userId) {
+        try {
+          const session = await Session.findOne({ user: socket.userId, disconnection: null });
+          if (session) {
+            if (!session.connection) {
+              const deleteSession = await Session.findByIdAndDelete(session._id);
+              if (deleteSession){
+                console.log('La sesion no tenia una fecha de inicio, se elimina');
+              }else{
+                console.log('No se pudo eliminar la sesion: ', session);
+              }
+            }else{
+              session.disconnection = new Date();
+              session.duration = (session.disconnection - session.connection) / 1000;
+              await session.save();
+              console.log('Desconexión registrada:', session);
+            }
+          }
+        } catch (err) {
+          console.error('Error al cerrar la desconexión:', err);
+        }
+      }
     });
   });
 
   console.log('WebSocket server running');
 }
 
-module.exports = { setupWebSocket };
+module.exports = setupWebSocket;

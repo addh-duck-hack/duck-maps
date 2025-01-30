@@ -1,4 +1,3 @@
-// filepath: /Users/jacobo/Documents/Duck-Hack/duck-maps/src/events/authenticate.js
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Session = require('../models/Session');
