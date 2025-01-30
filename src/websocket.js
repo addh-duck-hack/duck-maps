@@ -4,6 +4,8 @@ const authenticate = require('./events/authenticate');
 const assignCar = require('./events/assignCar');
 const Session = require('./models/Session');
 
+const connectedUsers = new Map(); // Mapa para almacenar los usuarios conectados
+
 function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server });
 
@@ -23,42 +25,27 @@ function setupWebSocket(server) {
 
         const { event } = parsedMessage;
         if (event === 'authenticate') {
-            //Aqui vamos a autenticar al usuario para que pueda utilizar el websocket
             await authenticate(socket, parsedMessage);
+            // Almacenar el usuario en el mapa de usuarios conectados
+            connectedUsers.set(socket.usuarioId, socket);
         } else if (event === 'assignCar') {
             await assignCar(socket, parsedMessage);
+        } else if (event === 'usersConnected') {
+            // Enviar la lista de usuarios conectados
+            const users = Array.from(connectedUsers.keys());
+            socket.send(JSON.stringify({ event: 'usersConnected', users }));
         }
     });
 
-    //Cerrar la conexion de cada usuario
+    // Cerrar la conexión de cada usuario
     socket.on('close', async () => {
-      console.log(`Usuario desconectado: ${socket.userId}`);
-      if (socket.userId) {
-        try {
-          const session = await Session.findOne({ user: socket.userId, disconnection: null });
-          if (session) {
-            if (!session.connection) {
-              const deleteSession = await Session.findByIdAndDelete(session._id);
-              if (deleteSession){
-                console.log('La sesion no tenia una fecha de inicio, se elimina');
-              }else{
-                console.log('No se pudo eliminar la sesion: ', session);
-              }
-            }else{
-              session.disconnection = new Date();
-              session.duration = (session.disconnection - session.connection) / 1000;
-              await session.save();
-              console.log('Desconexión registrada:', session);
-            }
-          }
-        } catch (err) {
-          console.error('Error al cerrar la desconexión:', err);
-        }
-      }
+      console.log(`Usuario desconectado: ${socket.usuarioId}`);
+      // Eliminar el usuario del mapa de usuarios conectados
+      connectedUsers.delete(socket.usuarioId);
     });
   });
 
   console.log('WebSocket server running');
 }
 
-module.exports = setupWebSocket;
+module.exports = { setupWebSocket };
