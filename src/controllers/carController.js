@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Car = require('../models/Car');
 
 // Crear un vehiculo
@@ -39,7 +40,7 @@ exports.updateCar = async (req, res) => {
   try {
     const allowedFields = ['typeCar', 'register', 'smallNumber', 'color', 'driver', 'active'];
     const updatedData = {};
-    const { register, driver } = req.body;
+    const { register } = req.body;
 
     // Convertir el campo register a mayúsculas
     const upperCaseRegister = register.toUpperCase();
