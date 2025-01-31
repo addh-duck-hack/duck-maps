@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./models/User');
 
 const CarSchema = new mongoose.Schema({
   typeCar: { type: String, required: true },
