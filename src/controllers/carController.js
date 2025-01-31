@@ -4,7 +4,7 @@ const Car = require('../models/Car');
 // Crear un vehiculo
 exports.newCar = async (req, res) => {
     try {
-        const { typeCar, register, smallNumber, color, driver } = req.body;
+        const { typeCar, register, smallNumber, color } = req.body;
 
         // Convertir el campo register a mayúsculas
         const upperCaseRegister = register.toUpperCase();
@@ -15,7 +15,7 @@ exports.newCar = async (req, res) => {
             return res.status(400).json({ error: 'Estas placas ya estan registradas' });
         }
 
-        const car = new Car({ typeCar, register: upperCaseRegister, smallNumber, color, driver });
+        const car = new Car({ typeCar, register: upperCaseRegister, smallNumber, color });
 
         await car.save();
 
@@ -40,7 +40,7 @@ exports.updateCar = async (req, res) => {
   try {
     const allowedFields = ['typeCar', 'register', 'smallNumber', 'color', 'driver', 'active'];
     const updatedData = {};
-    const { register } = req.body;
+    const { register, driver } = req.body;
 
     // Convertir el campo register a mayúsculas
     const upperCaseRegister = register.toUpperCase();
@@ -54,13 +54,16 @@ exports.updateCar = async (req, res) => {
         }
     }
 
+    // Convertir el ID del driver a ObjectId
+    const driverObjectId = new mongoose.Types.ObjectId(driver);
+
     // Filtrar los campos permitidos para la actualización
     Object.keys(req.body).forEach((field) => {
       if (allowedFields.includes(field)) {
         if (field === 'register') {
             updatedData[field] = upperCaseRegister;
         }else if(field === 'driver'){
-            updatedData[field] = mongoose.Types.ObjectId(req.body[field]);
+            updatedData[field] = driverObjectId;
         }else{
             updatedData[field] = req.body[field];
         }
