@@ -14,7 +14,7 @@ exports.newCar = async (req, res) => {
             return res.status(400).json({ error: 'Estas placas ya estan registradas' });
         }
 
-        const car = new Car({ typeCar, register, smallNumber, color, driver });
+        const car = new Car({ typeCar, register: upperCaseRegister, smallNumber, color, driver });
 
         await car.save();
 
@@ -39,9 +39,13 @@ exports.updateCar = async (req, res) => {
   try {
     const allowedFields = ['typeCar', 'register', 'smallNumber', 'color', 'driver', 'active'];
     const updatedData = {};
+    const { register } = req.body;
+
+    // Convertir el campo register a mayúsculas
+    const upperCaseRegister = register.toUpperCase();
 
     //Validamos si la placa ya esta registrada y si pertenece al mismo veahiculo
-    const existingCar = await Car.findOne({ register });
+    const existingCar = await Car.findOne({ upperCaseRegister });
     const idExistingCar = existingCar._id.toString();
     if (idExistingCar !== req.params.id) {
       return res.status(400).json({ error: 'Estas placas ya estan registradas en otro vehiculo' });
@@ -50,7 +54,11 @@ exports.updateCar = async (req, res) => {
     // Filtrar los campos permitidos para la actualización
     Object.keys(req.body).forEach((field) => {
       if (allowedFields.includes(field)) {
-        updatedData[field] = req.body[field];
+        if (field === 'register') {
+            updatedData[field] = upperCaseRegister;
+        }else{
+            updatedData[field] = req.body[field];
+        }
       }
     });
 
