@@ -73,7 +73,7 @@ exports.updateCar = async (req, res) => {
     const car = await Car.findByIdAndUpdate(req.params.id, updatedData, { new: true });
     if (!car) return res.status(404).json({ error: 'Vehiculo no encontrado' });
 
-    res.json(user);
+    res.json(car);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
