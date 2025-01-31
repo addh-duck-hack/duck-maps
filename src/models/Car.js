@@ -5,7 +5,7 @@ const CarSchema = new mongoose.Schema({
   register: { type: String, required: true },
   smallNumber: { type: String, required: true },
   color: { type: String },
-  driver: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', default: null},
+  driver: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null},
   active: { type: Boolean, default: true },
   creationDate: { type: Date, default: Date.now } // Fecha de alta automática
 });
