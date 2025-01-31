@@ -8,6 +8,7 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 const users = require('./routes/users');
+const cars = require('./routes/cars');
 const setupWebSocket = require('./websocket');
 
 // Middleware
@@ -21,6 +22,7 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 // Routes
 app.use('/', require('./routes/index'));
 app.use('/users', users);
+app.use('/cars', cars);
 
 // Setup WebSocket
 setupWebSocket(server);

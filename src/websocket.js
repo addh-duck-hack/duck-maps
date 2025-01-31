@@ -40,7 +40,7 @@ function setupWebSocket(server) {
             if (userSocket) {
               userSocket.send(JSON.stringify({ event: 'sendMessage', message }));
             } else {
-              socket.send(JSON.stringify({ event: 'error', message: 'Usuario no encontrado' }));
+              socket.send(JSON.stringify({ event: 'error', message: 'El usuario no esta disponible' }));
             }
           }
     });
