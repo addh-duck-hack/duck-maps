@@ -45,12 +45,14 @@ exports.updateCar = async (req, res) => {
     const upperCaseRegister = register.toUpperCase();
 
     //Validamos si la placa ya esta registrada y si pertenece al mismo veahiculo
-    const existingCar = await Car.findOne({ upperCaseRegister });
-    const idExistingCar = existingCar._id.toString();
-    if (idExistingCar !== req.params.id) {
-      return res.status(400).json({ error: 'Estas placas ya estan registradas en otro vehiculo' });
+    const existingCar = await Car.findOne({ register: upperCaseRegister });
+    if (existingCar) {
+        const idExistingCar = existingCar._id.toString();
+        if (idExistingCar !== req.params.id) {
+            return res.status(400).json({ error: 'Estas placas ya estan registradas en otro vehiculo' });
+        }
     }
-
+    
     // Filtrar los campos permitidos para la actualización
     Object.keys(req.body).forEach((field) => {
       if (allowedFields.includes(field)) {
