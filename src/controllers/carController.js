@@ -5,8 +5,11 @@ exports.newCar = async (req, res) => {
     try {
         const { typeCar, register, smallNumber, color, driver } = req.body;
 
+        // Convertir el campo register a mayúsculas
+        const upperCaseRegister = register.toUpperCase();
+
         // Se valida si la placa ya esta registrada
-        const existingCar = await Car.findOne({ register });
+        const existingCar = await Car.findOne({ register: upperCaseRegister });
         if (existingCar) {
             return res.status(400).json({ error: 'Estas placas ya estan registradas' });
         }
