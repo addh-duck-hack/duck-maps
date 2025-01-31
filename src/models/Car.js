@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const CarSchema = new mongoose.Schema({
-  typeCar: { type: String, enum: ['Sedan', 'HackBack', 'Camioneta', 'Sub'], default: 'Sedan' },
+  typeCar: { type: String, required: true },
   register: { type: String, required: true },
   smallNumber: { type: String, required: true },
   color: { type: String },
