@@ -14,6 +14,10 @@ const setupWebSocket = require('./websocket');
 // Middleware
 app.use(express.json());
 
+// Importar modelos
+require('./models/User');
+require('./models/Car');
+
 // Database connection
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
