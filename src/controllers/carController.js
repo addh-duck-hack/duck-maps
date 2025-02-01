@@ -54,8 +54,12 @@ exports.updateCar = async (req, res) => {
         }
     }
 
-    // Convertir el ID del driver a ObjectId
-    const driverObjectId = new mongoose.Types.ObjectId(driver);
+    // Si driver viene en "" se le asigna null
+    const driverObjectId = null;
+    if (driver !== "") {
+      // Convertir el ID del driver a ObjectId
+      driverObjectId = new mongoose.Types.ObjectId(driver);
+    }
 
     // Filtrar los campos permitidos para la actualización
     Object.keys(req.body).forEach((field) => {
